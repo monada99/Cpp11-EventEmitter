@@ -5,7 +5,6 @@
 #include <iostream>
 #include <unordered_map>
 #include <unordered_set>
-#include <vector>
 #include <list>
 
 template<
@@ -55,7 +54,7 @@ public:
     }
 
     template<class ...Args>
-    void emit( const EventType & event, Args ... args )
+    void emit( const EventType & event, Args && ... args )
     {
         auto it = _map.find( event );
         if( it != _map.end() )
@@ -132,6 +131,28 @@ public:
     std::size_t countListeners() const
     {
         return _countListeners;
+    }
+
+    bool remove( const Listener & listener )
+    {
+        for( auto & p : _map )
+        {
+            auto & listeners = p.second;
+            auto it = std::begin( listeners );
+            auto itEnd = std::end( listeners );
+
+            for( ; it != itEnd; ++it )
+            {
+                if( &*it == &listener )
+                {
+                    listeners.erase( it );
+                    --_countListeners;
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
 private:
